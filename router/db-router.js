@@ -160,9 +160,10 @@ router.put("/:id", (req, res) => {
         db.update(id, { title, contents })
           .then((post) => {
             res.status(200).json({
-              post,
+              post,                     
               message: "Update successful"
             });
+            //note to self - test out what happens when changing around the parameters post, title, contents
           })
           .catch(() => {
             res.status(500).json({
