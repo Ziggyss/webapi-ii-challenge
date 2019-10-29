@@ -87,89 +87,91 @@ router.post("/:id/comments", (req, res) => {
       message: "The post with the specified ID does not exist."
     });
   } else {
+    db.findById(id)
+      .then(post => {
+        if (!post) {
+          res.status(404).json({
+            message: "The post with the specified ID does not exist."
+          });
+        } else {
+          db.insertComment(text)
+            .then(comment => {
+              res.status(201).json(comment);
+            })
+            .catch(() => {
+              res.status(500).json({
+                message:
+                  "There was an error while saving the comment to the database"
+              });
+            });
+        }
+      })
+      .catch(() => {
+        res.status(500).json({
+          message: "There was an error while saving the comment to the database"
+        });
+      });
+  }
+});
+
+router.delete("/:id", (req, res) => {
+  const { id } = req.params;
+  db.findById(id)
+    .then(post => {
+      if (post.length === 0) {
+        res.status(404).json({
+          message: "The post with the specified ID does not exist."
+        });
+      } else {
+        db.remove(id)
+          .then(() => {
+            res.status(200).json({
+              message: "Delete post success"
+            });
+          })
+          .catch(() => {
+            res.status(500).json({
+              message: "The post could not be removed"
+            });
+          });
+      }
+    })
+    .catch(() => {
+      res.status(500).json({
+        message: "The post could not be removed"
+      });
+    });
+});
+
+router.put("/:id", (req, res) => {
+  const { id } = req.params;
+  const { title, contents } = req.body;
+  if (!title || !contents) {
+    res.status(400).json({
+      message: "Please provide title and contents for the post."
+    });
+  } else {
     db.findById(id).then(post => {
       if (!post) {
         res.status(404).json({
           message: "The post with the specified ID does not exist."
         });
       } else {
-        db.insertComment(text)
-          .then(comment => {
-            res.status(201).json(comment);
+        db.update(id, { title, contents })
+          .then(updatedPost => {
+            res.status(200).json({
+              title,
+              contents
+            });
           })
-          .catch(err => {
-            console.log(err);
+          .catch(() => {
             res.status(500).json({
-              message:
-                "There was an error while saving the comment to the database"
+              message: "The post information could not be modified."
             });
           });
       }
-    }).catch; //Do I need to write another .catch here?
+    }).catch;
   }
 });
-
-//does every .then need a corresponding .catch?
-
-router.delete("/:id", (req, res) => {
-  const { id } = req.params;
-  db.findById(id).then(post => {
-    if (post.length === 0) {
-      res.status(404).json({
-        message: "The post with the specified ID does not exist."
-      });
-    } else {
-      db.remove(id)
-        .then(deletedPost => {
-          res.status(200).json({
-            message: "Success",
-            deletedPost
-          });
-        })
-        .catch(err => {
-          console.log(err) //eslint complains if I don't use err
-          res.status(500).json({
-            message: "The post could not be removed"
-          });
-        });
-    }
-  }).catch;
-});
-
-router.put('/:id', (req, res) => {
-  const {id} = req.params;
-  const {title, contents} = req.body;
-  if(!title || !contents){
-    res.status(400).json({
-      message: "Please provide title and contents for the post."
-    })
-  } else {
-    db.findById(id)
-    .then(post => {
-      if(!post){
-        res.status(404).json({
-          message: "The post with the specified ID does not exist."
-        })
-      } else {
-        db.update(id, {title, contents})
-        .then(updatedPost => {
-          res.status(200).json({
-            title,
-            contents
-          })
-        })
-        .catch(err => {
-          console.log(err);
-          res.status(500).json({
-            message: "The post information could not be modified."
-          })
-        })
-      }
-    })
-    .catch
-  }
-})
-
-
 
 module.exports = router;
