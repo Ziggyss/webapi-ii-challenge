@@ -152,16 +152,16 @@ router.put("/:id", (req, res) => {
     });
   } else {
     db.findById(id).then(post => {
-      if (!post) {
+      if (post.length === 0) {
         res.status(404).json({
           message: "The post with the specified ID does not exist."
         });
       } else {
         db.update(id, { title, contents })
-          .then(updatedPost => {
+          .then((post) => {
             res.status(200).json({
-              title,
-              contents
+              post,
+              message: "Update successful"
             });
           })
           .catch(() => {
@@ -170,7 +170,9 @@ router.put("/:id", (req, res) => {
             });
           });
       }
-    }).catch;
+    }).catch((err)=> {
+        console.log(err)
+    });
   }
 });
 
